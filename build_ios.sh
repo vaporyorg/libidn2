@@ -1,12 +1,34 @@
 #! /bin/sh
 
+# This script builds the libidn2 for iOS using the SDK installed on the system.
+#
+# This library has a prerequisite - libunistring:
+#
+# Prerequisite: make sure you have built the libunistring and placed 
+# it in the sibling directory. To do this, clone the mirror of the 
+# libunistring repository at git@github.com:gnosis/libunistring.git
+# checkout its "ios" branch, and build it using the build_ios.sh script
+#
+# After you've built both of the libraries, copy the following files
+# and folders to your project's respective directories:
+#   libunistring/.build/include
+#   libunistring/.build/iphoneos/lib/libunistring.a
+#   libunistring/.build/iphonesimulator/lib/libunistring.a
+#   libidn2/.build/include
+#   libidn2/.build/iphoneos/lib/libidn2.a
+#   libidn2/.build/iphonesimulator/lib/libidn2.a
+
+#
+# Before building, run the bootstrap script:
+#  ./bootstrap
+#
+# You may need to export PATHs below as well
+
 set -x
 
 export PATH="/usr/local/opt/gettext/bin:$PATH"
 export PATH="/usr/local/opt/texinfo/bin:$PATH"
 export PATH="/usr/local/opt/m4/bin:$PATH"
-
-# ./bootstrap
 
 function compile_lib() {
     local SDK=$1
