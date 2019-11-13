@@ -53,10 +53,32 @@ compile_lib iPhoneOS          armv7s  arm-apple-darwin    .build/iphoneos-armv7s
 compile_lib iPhoneSimulator   i386    i686-apple-darwin   .build/iphonesimulator-i386
 compile_lib iPhoneSimulator   x86_64  x86_64-apple-darwin .build/iphonesimulator-x86_64
 
+
+# create the fat libraries
+
 PRODUCT_NAME=libidn2.a
 
 mkdir -p .build/iphoneos/lib .build/iphonesimulator/lib
-cp -R .build/iphoneos-arm64/include .build/iphoneos/
-cp -R .build/iphonesimulator-i386/include .build/iphonesimulator/
+cp -R .build/iphoneos-arm64/include .build/
+
 lipo -create .build/iphoneos-{arm64,armv7,armv7s}/lib/${PRODUCT_NAME} -output .build/iphoneos/lib/${PRODUCT_NAME}
 lipo -create .build/iphonesimulator-{i386,x86_64}/lib/${PRODUCT_NAME} -output .build/iphonesimulator/lib/${PRODUCT_NAME}
+
+# generate modulemap file
+INCLUDE_DIR=.build/include
+MODULEMAP_FILE=${INCLUDE_DIR}/module.modulemap
+
+# header
+echo "module idn2 {" > ${MODULEMAP_FILE}
+
+# include files
+find ${INCLUDE_DIR} -name "*.h" | sed "s|^${INCLUDE_DIR}/\(.*\)|header \"\1\"|" >> ${MODULEMAP_FILE}
+
+# export all symbols
+echo "export *" >> ${MODULEMAP_FILE}
+
+# link to dependencies
+LIBS_TO_LINK="iconv unistring"
+for LIB in ${LIBS_TO_LINK}; do echo "link \"${LIB}\"" >> ${MODULEMAP_FILE}; done
+
+echo "}" >> ${MODULEMAP_FILE}
